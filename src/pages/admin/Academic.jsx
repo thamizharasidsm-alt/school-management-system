@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, GraduationCap, BookOpen, Clock, CalendarDays, Pencil, Trash2, Users, Search, Filter, ChevronDown, X } from 'lucide-react';
 import AcademicTimetable, { MOCK_TIMETABLE } from './AcademicTimetable';
 import AcademicExams, { MOCK_EXAMS } from './AcademicExams';
-import { MOCK_STUDENTS } from './UserManagement';
+import { MOCK_STUDENTS, MOCK_STAFF } from './UserManagement';
 
 export const MOCK_CLASSES = [
   {
@@ -18,7 +18,7 @@ export const MOCK_CLASSES = [
     grade: 'Grade 6',
     section: 'B',
     room: 'Room 205',
-    teacher: 'Robert Chen',
+    teacher: 'Emily Watson',
     schedule: 'Mon - Fri 8:00-15:30',
   },
   {
@@ -58,10 +58,10 @@ export const MOCK_CLASSES = [
 export const MOCK_SUBJECTS = [
   { id: 1, name: 'Mathematics', code: 'MATH101', teacher: 'Sarah Connor', hrs: '5h', grade: 'Grade 5 - A' },
   { id: 2, name: 'Science', code: 'SCI101', teacher: 'Robert Chen', hrs: '5h', grade: 'Grade 6 - B' },
-  { id: 3, name: 'English', code: 'ENG101', teacher: 'Maria santos', hrs: '5h', grade: 'Grade 7 - C' },
-  { id: 4, name: 'History', code: 'HIS101', teacher: 'James porter', hrs: '5h', grade: 'Grade 4 - A' },
-  { id: 5, name: 'Arts', code: 'ART101', teacher: 'Lisa park', hrs: '5h', grade: 'Grade 8 - A' },
-  { id: 6, name: 'Physical education', code: 'PE101', teacher: 'David kim', hrs: '5h', grade: 'Grade 5 - B' },
+  { id: 3, name: 'English', code: 'ENG101', teacher: 'Maria Santos', hrs: '5h', grade: 'Grade 7 - C' },
+  { id: 4, name: 'History', code: 'HIS101', teacher: 'James Porter', hrs: '5h', grade: 'Grade 4 - A' },
+  { id: 5, name: 'Arts', code: 'ART101', teacher: 'Lisa Park', hrs: '5h', grade: 'Grade 8 - A' },
+  { id: 6, name: 'Physical education', code: 'PE101', teacher: 'David Kim', hrs: '5h', grade: 'Grade 5 - B' },
 ];
 
 export default function Academic() {
@@ -70,10 +70,65 @@ export default function Academic() {
   const [formError, setFormError] = useState('');
   const [updateFlag, setUpdateFlag] = useState(0);
 
+  const [classesList, setClassesList] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  const [studentsList, setStudentsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [newClassData, setNewClassData] = useState({ grade: '', section: '', room: '', teacher: '', schedule: '' });
   const [newSubjectData, setNewSubjectData] = useState({ name: '', code: '', teacher: '', hrs: '', grade: '' });
   const [newTimetableData, setNewTimetableData] = useState({ startTime: '', endTime: '' });
   const [newExamData, setNewExamData] = useState({ title: '', status: 'Planning', date: '', grade: '', subject: '' });
+
+  // Load from LocalStorage
+  useEffect(() => {
+    // Load staff for dropdown allocation
+    let storedStaff = localStorage.getItem('MOCK_STAFF');
+    if (!storedStaff) {
+      localStorage.setItem('MOCK_STAFF', JSON.stringify(MOCK_STAFF));
+      storedStaff = JSON.stringify(MOCK_STAFF);
+    }
+    const parsedStaff = JSON.parse(storedStaff);
+    setStaffList(parsedStaff);
+
+    // Load students for count per class
+    let storedStudents = localStorage.getItem('MOCK_STUDENTS');
+    if (!storedStudents) {
+      localStorage.setItem('MOCK_STUDENTS', JSON.stringify(MOCK_STUDENTS));
+      storedStudents = JSON.stringify(MOCK_STUDENTS);
+    }
+    const parsedStudents = JSON.parse(storedStudents);
+    setStudentsList(parsedStudents);
+
+    // Load classes
+    let storedClasses = localStorage.getItem('MOCK_CLASSES');
+    if (!storedClasses) {
+      // Map initial classes to match default staff assignments
+      const mappedDefaultClasses = MOCK_CLASSES.map(cls => {
+        const staffObj = parsedStaff.find(s => s.name === cls.teacher);
+        return {
+          id: cls.id,
+          grade: cls.grade,
+          section: cls.section,
+          room: cls.room,
+          teacher: cls.teacher,
+          teacher_id: staffObj ? staffObj.id : 'STF-1001',
+          schedule: cls.schedule
+        };
+      });
+      localStorage.setItem('MOCK_CLASSES', JSON.stringify(mappedDefaultClasses));
+      storedClasses = JSON.stringify(mappedDefaultClasses);
+    }
+    
+    const parsedClasses = JSON.parse(storedClasses);
+    setClassesList(parsedClasses);
+    
+    // Mutate the exported reference to keep in sync
+    MOCK_CLASSES.length = 0;
+    MOCK_CLASSES.push(...parsedClasses);
+
+    setLoading(false);
+  }, [updateFlag]);
 
   return (
     <>
@@ -116,9 +171,13 @@ export default function Academic() {
         </button>
       </div>
 
-      {activeTab === 'classes' && (
+      {loading && activeTab === 'classes' ? (
+        <div style={{ textAlign: 'center', padding: '50px', fontSize: '16px', color: '#64748B' }}>Loading classes...</div>
+      ) : null}
+
+      {!loading && activeTab === 'classes' && (
         <div className="classes-grid">
-          {MOCK_CLASSES.map(cls => (
+          {classesList.map(cls => (
             <div key={cls.id} className="class-card">
               <div className="class-card-header">
                 <div className="class-icon">
@@ -126,7 +185,13 @@ export default function Academic() {
                 </div>
                 <div className="class-actions">
                   <button className="action-btn edit"><Pencil size={16} /></button>
-                  <button className="action-btn delete"><Trash2 size={16} /></button>
+                  <button className="action-btn delete" onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete ${cls.grade} - ${cls.section}?`)) {
+                      const updated = classesList.filter(c => c.id !== cls.id);
+                      localStorage.setItem('MOCK_CLASSES', JSON.stringify(updated));
+                      setUpdateFlag(prev => prev + 1);
+                    }
+                  }}><Trash2 size={16} /></button>
                 </div>
               </div>
               
@@ -135,7 +200,7 @@ export default function Academic() {
                 <p className="class-room">{cls.room}</p>
                 <div className="class-stats">
                   <span className="student-count">
-                    <Users size={14} /> {MOCK_STUDENTS.filter(s => s.grade === `${cls.grade} - ${cls.section}`).length} Students
+                    <Users size={14} /> {studentsList.filter(s => s.grade === `${cls.grade} - ${cls.section}`).length} Students
                   </span>
                   <span className="grade-badge-purple">{cls.grade}</span>
                 </div>
@@ -250,8 +315,19 @@ export default function Academic() {
                     <input type="text" placeholder="e.g. Room 101" style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none' }} value={newClassData.room} onChange={e => setNewClassData({...newClassData, room: e.target.value})} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ fontSize: '13px', fontWeight: 600, color: '#475569' }}>Teacher</label>
-                    <input type="text" placeholder="e.g. Sarah Connor" style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none' }} value={newClassData.teacher} onChange={e => setNewClassData({...newClassData, teacher: e.target.value})} />
+                    <label style={{ fontSize: '13px', fontWeight: 600, color: '#475569' }}>Class Teacher (Compulsory)</label>
+                    <select 
+                      style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none', background: 'white', fontSize: '14px' }} 
+                      value={newClassData.teacher} 
+                      onChange={e => setNewClassData({...newClassData, teacher: e.target.value})}
+                    >
+                      <option value="">-- Select Allocated Teacher --</option>
+                      {staffList.filter(s => s.status === 'Active').map(teacher => (
+                        <option key={teacher.id} value={teacher.id}>
+                          {teacher.name} ({teacher.department})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '13px', fontWeight: 600, color: '#475569' }}>Schedule</label>
@@ -334,9 +410,22 @@ export default function Academic() {
                 onClick={() => {
                   if (activeTab === 'classes') {
                     if (!newClassData.grade.trim() || !newClassData.section.trim() || !newClassData.room.trim() || !newClassData.teacher.trim()) {
-                      setFormError('Grade, Section, Room, and Teacher are required.'); return;
+                      setFormError('Grade, Section, Room, and Class Teacher allocation are required.'); return;
                     }
-                    MOCK_CLASSES.push({ id: MOCK_CLASSES.length + 1, ...newClassData });
+
+                    const teacherObj = staffList.find(s => s.id === newClassData.teacher);
+                    const newClass = { 
+                      id: classesList.length + 1, 
+                      grade: newClassData.grade.trim(),
+                      section: newClassData.section.trim(),
+                      room: newClassData.room.trim(),
+                      teacher: teacherObj ? teacherObj.name : newClassData.teacher,
+                      teacher_id: newClassData.teacher,
+                      schedule: newClassData.schedule.trim() || 'Mon - Fri 8:00-15:00'
+                    };
+
+                    const updated = [...classesList, newClass];
+                    localStorage.setItem('MOCK_CLASSES', JSON.stringify(updated));
                     setNewClassData({ grade: '', section: '', room: '', teacher: '', schedule: '' });
                   } else if (activeTab === 'subjects') {
                     if (!newSubjectData.name.trim() || !newSubjectData.code.trim() || !newSubjectData.teacher.trim() || !newSubjectData.grade.trim()) {

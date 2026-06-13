@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Save, 
   Users, 
@@ -37,8 +37,26 @@ const CLASS_STATS = [
 ];
 
 export default function TeacherAttendance() {
-  const [students, setStudents] = useState(INITIAL_STUDENTS);
+  const [students, setStudents] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('MOCK_STUDENTS');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const mapped = parsed.map((s, idx) => ({
+        id: s.id || `STU-${idx}`,
+        name: s.name,
+        roll: `Roll No: ${idx + 1 < 10 ? '0' + (idx + 1) : idx + 1}`,
+        avatar: s.avatar || `https://i.pravatar.cc/150?u=${s.id}`,
+        status: 'present',
+        class: s.grade ? s.grade.replace('Grade ', '') : '10-A'
+      }));
+      setStudents(mapped);
+    } else {
+      setStudents(INITIAL_STUDENTS);
+    }
+  }, []);
 
   const handleStatusChange = (id, newStatus) => {
     setStudents(prev => 

@@ -1,0 +1,124 @@
+﻿
+D:\Thamizh\school management\src\App.jsx
+  1:8  error  'React' is defined but never used       no-unused-vars
+  7:3  error  'CreditCard' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\Academic.jsx
+   1:8   error  'React' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+   7:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-refresh/only-export-components
+  58:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-refresh/only-export-components
+  85:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  83 |   // Load from LocalStorage
+  84 |   useEffect(() => {
+> 85 |     setLoading(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  86 |     
+  87 |     // Load staff for dropdown allocation
+  88 |     let storedStaff = localStorage.getItem('MOCK_STAFF');  react-hooks/set-state-in-effect
+
+D:\Thamizh\school management\src\pages\admin\AcademicExams.jsx
+   1:8   error  'React' is defined but never used                                                                                               no-unused-vars
+   5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  52:10  error  'updateFlag' is assigned a value but never used                                                                                 no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\AcademicTimetable.jsx
+  4:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Thamizh\school management\src\pages\admin\Approvals.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\Attendance.jsx
+  1:8    error  'React' is defined but never used     no-unused-vars
+  2:96   error  'Calendar' is defined but never used  no-unused-vars
+  2:106  error  'Filter' is defined but never used    no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\Communication.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\CommunicationBroadcast.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\CommunicationNotifications.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\Dashboard.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\Documents.jsx
+  1:8  error  'React' is defined but never used     no-unused-vars
+  3:3  error  'Download' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\Fees.jsx
+   1:8   error  'React' is defined but never used                                                                                               no-unused-vars
+  18:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  51:9   error  The value assigned to 'rawData' is not used in subsequent statements                                                            no-useless-assignment
+
+D:\Thamizh\school management\src\pages\admin\FeesPayment.jsx
+  1:8   error  'React' is defined but never used                                                                                               no-unused-vars
+  4:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Thamizh\school management\src\pages\admin\FeesPending.jsx
+  1:8   error  'React' is defined but never used                                                                                               no-unused-vars
+  5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Thamizh\school management\src\pages\admin\Reports.jsx
+    1:8  error    'React' is defined but never used                                                                                                                                                                                                             no-unused-vars
+  163:6  warning  React Hook useMemo has an unnecessary dependency: 'MOCK_STUDENTS'. Either exclude it or remove the dependency array. Outer scope values like 'MOCK_STUDENTS' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+
+D:\Thamizh\school management\src\pages\admin\Settings.jsx
+   1:8  error  'React' is defined but never used          no-unused-vars
+  16:3  error  'MessageSquare' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\admin\UserManagement.jsx
+    1:8   error  'React' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   no-unused-vars
+    2:10  error  'Upload' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+    2:32  error  'Filter' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+    4:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-refresh/only-export-components
+   66:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-refresh/only-export-components
+  115:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  113 |   // Load data from LocalStorage or seed defaults
+  114 |   useEffect(() => {
+> 115 |     setLoading(true);
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  116 |     
+  117 |     // Load students
+  118 |     let storedStudents = localStorage.getItem('MOCK_STUDENTS');  react-hooks/set-state-in-effect
+
+D:\Thamizh\school management\src\pages\auth\Login.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\teacher\Messages.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\teacher\MyClasses.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\teacher\Students.jsx
+   1:8   error  'React' is defined but never used                                       no-unused-vars
+  31:45  error  'idx' is defined but never used                                         no-unused-vars
+  35:13  error  The value assigned to 'attText' is not used in subsequent statements    no-useless-assignment
+  36:13  error  The value assigned to 'attStatus' is not used in subsequent statements  no-useless-assignment
+
+D:\Thamizh\school management\src\pages\teacher\TeacherAttendance.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+D:\Thamizh\school management\src\pages\teacher\TeacherDashboard.jsx
+   1:8   error  'React' is defined but never used   no-unused-vars
+  13:18  error  'Legend' is defined but never used  no-unused-vars
+
+Γ£û 47 problems (46 errors, 1 warning)
+

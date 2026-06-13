@@ -46,6 +46,14 @@ const TIMETABLE = [
 export default function TeacherDashboard() {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  const studentCount = React.useMemo(() => {
+    const stored = localStorage.getItem('MOCK_STUDENTS');
+    if (stored) {
+      return JSON.parse(stored).length;
+    }
+    return 15;
+  }, []);
+
   return (
     <div className="teacher-dashboard">
       <div className="dashboard-header-teacher">
@@ -69,7 +77,7 @@ export default function TeacherDashboard() {
             <div className="stat-icon purple-light-bg"><Users size={20} color="#8B5CF6" /></div>
             <span className="stat-badge positive">↗ 5%</span>
           </div>
-          <h2>15</h2>
+          <h2>{studentCount}</h2>
           <p>Total Students<br/>vs last semester</p>
         </div>
 

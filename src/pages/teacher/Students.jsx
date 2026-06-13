@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter,
@@ -17,9 +17,58 @@ const STUDENTS_DATA = [
 ];
 
 export default function Students() {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredStudents = STUDENTS_DATA.filter(student => {
+  useEffect(() => {
+    function loadTeacherStudents() {
+      setLoading(true);
+      const storedStudents = localStorage.getItem('MOCK_STUDENTS');
+      const parsedStudents = storedStudents ? JSON.parse(storedStudents) : STUDENTS_DATA;
+
+      // Map student records to include the attendance and performance fields expected by this UI
+      const mapped = parsedStudents.map((s, idx) => {
+        // Generate mock performance data deterministically based on their name/id length
+        const score = 60 + ((s.name.length * 7) % 38); 
+        const attPercent = 75 + ((s.id.length * 9) % 26);
+        let attText = 'Good';
+        let attStatus = 'excellent';
+        if (attPercent < 80) {
+          attText = 'At Risk';
+          attStatus = 'danger';
+        } else if (attPercent < 90) {
+          attText = 'Need Attention';
+          attStatus = 'warning';
+        } else {
+          attText = 'Excellent';
+          attStatus = 'excellent';
+        }
+
+        let grade = 'Grade B';
+        if (score >= 90) grade = 'Grade A+';
+        else if (score >= 80) grade = 'Grade A';
+        else if (score >= 70) grade = 'Grade B+';
+
+        return {
+          id: s.id,
+          name: s.name,
+          class: s.grade ? s.grade.replace('Grade ', '') : '10-A', // Map e.g. "Grade 4 - A" -> "4-A"
+          attPercent,
+          attText,
+          attStatus,
+          grade,
+          score,
+          avatar: s.avatar
+        };
+      });
+      setStudents(mapped);
+      setLoading(false);
+    }
+    loadTeacherStudents();
+  }, []);
+
+  const filteredStudents = students.filter(student => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return student.name.toLowerCase().includes(query) || student.id.toLowerCase().includes(query);
@@ -53,62 +102,66 @@ export default function Students() {
 
         {/* Table */}
         <div className="students-table-container">
-          <table className="students-table">
-            <thead>
-              <tr>
-                <th>STUDENT</th>
-                <th>CLASS</th>
-                <th>ATTENDANCE %</th>
-                <th>PERFORMANCE</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.length === 0 ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>Loading students...</div>
+          ) : (
+            <table className="students-table">
+              <thead>
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
-                    No students found.
-                  </td>
+                  <th>STUDENT</th>
+                  <th>CLASS</th>
+                  <th>ATTENDANCE %</th>
+                  <th>PERFORMANCE</th>
                 </tr>
-              ) : (
-                filteredStudents.map(student => (
-                  <tr key={student.id}>
-                    <td>
-                      <div className="student-info-cell">
-                        <img src={student.avatar} alt={student.name} className="student-avatar-img" />
-                        <div className="student-name-id">
-                          <span className="student-name">{student.name}</span>
-                          <span className="student-id">{student.id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="class-badge-purple">{student.class}</span>
-                    </td>
-                    <td>
-                      <div className={`attendance-cell status-${student.attStatus}`}>
-                        <span className="att-percent">{student.attPercent}%</span>
-                        <span className="att-text">{student.attText}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="performance-cell">
-                        <div className="perf-text-row">
-                          <span className="grade-text">{student.grade}</span>
-                          <span className="score-text">{student.score}/100</span>
-                        </div>
-                        <div className="perf-bar-track">
-                          <div 
-                            className={`perf-bar-fill ${student.attStatus === 'danger' ? 'danger-fill' : student.attStatus === 'warning' ? 'warning-fill' : 'success-fill'}`} 
-                            style={{ width: `${student.score}%` }}
-                          ></div>
-                        </div>
-                      </div>
+              </thead>
+              <tbody>
+                {filteredStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+                      No students found.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredStudents.map(student => (
+                    <tr key={student.id}>
+                      <td>
+                        <div className="student-info-cell">
+                          <img src={student.avatar} alt={student.name} className="student-avatar-img" />
+                          <div className="student-name-id">
+                            <span className="student-name">{student.name}</span>
+                            <span className="student-id">{student.id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="class-badge-purple">{student.class}</span>
+                      </td>
+                      <td>
+                        <div className={`attendance-cell status-${student.attStatus}`}>
+                          <span className="att-percent">{student.attPercent}%</span>
+                          <span className="att-text">{student.attText}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="performance-cell">
+                          <div className="perf-text-row">
+                            <span className="grade-text">{student.grade}</span>
+                            <span className="score-text">{student.score}/100</span>
+                          </div>
+                          <div className="perf-bar-track">
+                            <div 
+                              className={`perf-bar-fill ${student.attStatus === 'danger' ? 'danger-fill' : student.attStatus === 'warning' ? 'warning-fill' : 'success-fill'}`} 
+                              style={{ width: `${student.score}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   Bell,
   Plus,
@@ -8,7 +8,8 @@ import {
   IndianRupee,
   Check,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -47,6 +48,107 @@ const feeData = [
 export default function Dashboard({ onNavigate }) {
   const alertsRef = useRef(null);
   const [highlightAlerts, setHighlightAlerts] = useState(false);
+  const [counts, setCounts] = useState({
+    students: MOCK_STUDENTS.length,
+    staff: MOCK_STAFF.length,
+    classes: MOCK_CLASSES.length
+  });
+  const [teacherApprovals, setTeacherApprovals] = useState([]);
+  const [studentLeaves, setStudentLeaves] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const diff = Date.now() - timestamp;
+    if (diff < 60 * 1000) return 'Just now';
+    const mins = Math.floor(diff / (60 * 1000));
+    if (mins < 60) return `${mins} minute${mins > 1 ? 's' : ''} ago`;
+    const hours = Math.floor(diff / (3600 * 1000));
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    const days = Math.floor(diff / (24 * 3600 * 1000));
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  };
+
+  const getActivityIcon = (type) => {
+    switch (type) {
+      case 'student':
+      case 'staff':
+      case 'parent':
+        return { icon: <GraduationCap size={18} />, bg: 'bg-green' };
+      case 'fee':
+        return { icon: <IndianRupee size={18} />, bg: 'bg-purple' };
+      case 'attendance':
+        return { icon: <Check size={18} />, bg: '', style: { background: 'white', color: '#10B981', border: '1px solid #10B981' } };
+      case 'leave':
+        return { icon: <Bell size={18} />, bg: 'bg-purple' };
+      default:
+        return { icon: <Bell size={18} />, bg: 'bg-purple' };
+    }
+  };
+
+  useEffect(() => {
+    function loadCountsAndApprovals() {
+      const storedStudents = localStorage.getItem('MOCK_STUDENTS');
+      const parsedStudents = storedStudents ? JSON.parse(storedStudents) : MOCK_STUDENTS;
+
+      const storedStaff = localStorage.getItem('MOCK_STAFF');
+      const parsedStaff = storedStaff ? JSON.parse(storedStaff) : MOCK_STAFF;
+
+      const storedClasses = localStorage.getItem('MOCK_CLASSES');
+      const parsedClasses = storedClasses ? JSON.parse(storedClasses) : MOCK_CLASSES;
+
+      setCounts({
+        students: parsedStudents.length,
+        staff: parsedStaff.length,
+        classes: parsedClasses.length
+      });
+
+      // Load teacher approvals
+      const storedTeacher = localStorage.getItem('MOCK_TEACHER_APPROVALS');
+      const defaultApprovals = [
+        { id: 1, name: 'Sarah Connor', role: 'Teacher', reason: 'Medical Leave request for 3 days', type: 'Leave Request', date: '2026-04-10', status: 'Pending' },
+        { id: 2, name: 'John Doe', role: 'Teacher', reason: 'Medical Leave request for 3 days', type: 'Leave Request', date: '2026-04-10', status: 'Approved' },
+        { id: 3, name: 'Jane Smith', role: 'Teacher', reason: 'Medical Leave request for 3 days', type: 'Leave Request', date: '2026-04-10', status: 'Approved' },
+        { id: 4, name: 'Mike Ross', role: 'Teacher', reason: 'Medical Leave request for 3 days', type: 'Leave Request', date: '2026-04-10', status: 'Pending' },
+        { id: 5, name: 'Rachel Zane', role: 'Teacher', reason: 'Medical Leave request for 3 days', type: 'Leave Request', date: '2026-04-10', status: 'Pending' },
+        { id: 6, name: 'Harvey Specter', role: 'Teacher', reason: 'Medical Leave request for 3 days', type: 'Leave Request', date: '2026-04-10', status: 'Rejected' },
+        { id: 7, name: 'James Porter', role: 'Teacher', reason: 'Request to correct attendance', type: 'Attendance Edit', date: '2026-04-12', status: 'Pending' },
+        { id: 8, name: 'Robert Chen', role: 'Parent', reason: 'Attendance correction', type: 'Attendance Edit', date: '2026-04-12', status: 'Pending' },
+      ];
+      if (storedTeacher) {
+        setTeacherApprovals(JSON.parse(storedTeacher));
+      } else {
+        localStorage.setItem('MOCK_TEACHER_APPROVALS', JSON.stringify(defaultApprovals));
+        setTeacherApprovals(defaultApprovals);
+      }
+
+      // Load student leaves
+      const storedStudentLeaves = localStorage.getItem('MOCK_LEAVE_REQUESTS');
+      if (storedStudentLeaves) {
+        setStudentLeaves(JSON.parse(storedStudentLeaves));
+      }
+
+      // Load recent activities
+      const storedActivities = localStorage.getItem('MOCK_ACTIVITIES');
+      const defaultActivities = [
+        { id: 'act-init-1', title: 'Liam Smith admitted to Grade 5 - B', type: 'student', by: 'Admin Elena', initials: 'AE', timestamp: Date.now() - 3 * 60 * 1000 },
+        { id: 'act-init-2', title: 'Emily Brown paid fee for Term 1', type: 'fee', by: 'Emily Brown', initials: 'EB', timestamp: Date.now() - 12 * 60 * 1000 },
+        { id: 'act-init-3', title: 'Emily Brown paid fee for Term 2', type: 'fee', by: 'Emily Brown', initials: 'EB', timestamp: Date.now() - 25 * 60 * 1000 }
+      ];
+      if (storedActivities) {
+        setActivities(JSON.parse(storedActivities));
+      } else {
+        localStorage.setItem('MOCK_ACTIVITIES', JSON.stringify(defaultActivities));
+        setActivities(defaultActivities);
+      }
+    }
+    loadCountsAndApprovals();
+  }, []);
 
   const handleNewAnnouncement = () => {
     if (alertsRef.current) {
@@ -58,15 +160,93 @@ export default function Dashboard({ onNavigate }) {
     }
   };
 
-  const totalStudents = MOCK_STUDENTS.length;
-  const totalStaff = MOCK_STAFF.length;
-  const totalClasses = MOCK_CLASSES.length;
+  const handleApproveTeacher = (id) => {
+    const updated = teacherApprovals.map(item => 
+      item.id === id ? { ...item, status: 'Approved' } : item
+    );
+    setTeacherApprovals(updated);
+    localStorage.setItem('MOCK_TEACHER_APPROVALS', JSON.stringify(updated));
+    showToast('Staff approval request approved!');
+  };
+
+  const handleRejectTeacher = (id) => {
+    const updated = teacherApprovals.map(item => 
+      item.id === id ? { ...item, status: 'Rejected' } : item
+    );
+    setTeacherApprovals(updated);
+    localStorage.setItem('MOCK_TEACHER_APPROVALS', JSON.stringify(updated));
+    showToast('Staff approval request rejected.');
+  };
+
+  const handleApproveStudent = (id) => {
+    const updated = studentLeaves.map(leave => {
+      if (leave.id === id) {
+        const returnEmail = {
+          id: `EML-${Date.now().toString().slice(-3)}-admin`,
+          from: `Admin Portal (admin@gmail.com)`,
+          to: `${leave.parentName} (${leave.parentEmail || 'parent@gmail.com'})`,
+          subject: `Leave Request Approved by Admin: ${leave.studentName}`,
+          body: `Dear Parent,\n\nThis is to inform you that your leave request for ${leave.studentName} on ${leave.date} has been Approved by the School Administration.\n\nSincerely,\nSchool Administration`,
+          date: new Date().toLocaleString(),
+          status: 'Sent'
+        };
+        return {
+          ...leave,
+          status: 'Approved',
+          readByParent: false,
+          emailLogs: [...(leave.emailLogs || []), returnEmail]
+        };
+      }
+      return leave;
+    });
+    setStudentLeaves(updated);
+    localStorage.setItem('MOCK_LEAVE_REQUESTS', JSON.stringify(updated));
+    showToast('Student leave request approved! Parent notified.');
+  };
+
+  const handleRejectStudent = (id) => {
+    const updated = studentLeaves.map(leave => {
+      if (leave.id === id) {
+        const returnEmail = {
+          id: `EML-${Date.now().toString().slice(-3)}-admin`,
+          from: `Admin Portal (admin@gmail.com)`,
+          to: `${leave.parentName} (${leave.parentEmail || 'parent@gmail.com'})`,
+          subject: `Leave Request Rejected by Admin: ${leave.studentName}`,
+          body: `Dear Parent,\n\nThis is to inform you that your leave request for ${leave.studentName} on ${leave.date} has been Rejected by the School Administration.\n\nSincerely,\nSchool Administration`,
+          date: new Date().toLocaleString(),
+          status: 'Sent'
+        };
+        return {
+          ...leave,
+          status: 'Rejected',
+          readByParent: false,
+          emailLogs: [...(leave.emailLogs || []), returnEmail]
+        };
+      }
+      return leave;
+    });
+    setStudentLeaves(updated);
+    localStorage.setItem('MOCK_LEAVE_REQUESTS', JSON.stringify(updated));
+    showToast('Student leave request rejected. Parent notified.');
+  };
+
+  const totalStudents = counts.students;
+  const totalStaff = counts.staff;
+  const totalClasses = counts.classes;
   const totalRevenueNum = MOCK_FEES.reduce((sum, fee) => {
     return sum + parseInt(fee.amount.replace(/[^0-9]/g, ''), 10);
   }, 0);
   const formattedRevenue = (totalRevenueNum / 1000).toFixed(1) + 'k';
   return (
     <>
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="custom-toast">
+          <Sparkles size={16} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Dashboard Title */}
       <div className="dashboard-title-area">
         <div className="dashboard-title">
@@ -193,83 +373,28 @@ export default function Dashboard({ onNavigate }) {
           <p className="widget-subtitle">Live update from today</p>
           
           <div className="activity-list">
-            <div className="activity-item">
-              <div className="activity-icon bg-green">
-                <GraduationCap size={18} />
-              </div>
-              <div className="activity-content">
-                <h4>Liam smith admitted to Grade 5</h4>
-                <div className="activity-details">
-                  <span className="activity-initials">AE</span>
-                  Admin Elena . 3 minutes ago
+            {activities.slice(0, 3).map(act => {
+              const info = getActivityIcon(act.type);
+              return (
+                <div key={act.id} className="activity-item">
+                  <div className={`activity-icon ${info.bg}`} style={info.style}>
+                    {info.icon}
+                  </div>
+                  <div className="activity-content">
+                    <h4>{act.title}</h4>
+                    <div className="activity-details">
+                      <span className="activity-initials">{act.initials}</span>
+                      {act.by} • {formatTimeAgo(act.timestamp)}
+                    </div>
+                  </div>
                 </div>
+              );
+            })}
+            {activities.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)' }}>
+                No recent activity.
               </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-icon bg-purple">
-                <IndianRupee size={18} />
-              </div>
-              <div className="activity-content">
-                <h4>Emily Brown paid fee for Term 1</h4>
-                <div className="activity-details">
-                  <span className="activity-initials">EB</span>
-                  Emily Brown . 12 minutes ago
-                </div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-icon bg-green">
-                <GraduationCap size={18} />
-              </div>
-              <div className="activity-content">
-                <h4>Emily Brown admitted to Grade 6</h4>
-                <div className="activity-details">
-                  <span className="activity-initials">AE</span>
-                  Admin Elena . 25 minutes ago
-                </div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-icon bg-purple">
-                <IndianRupee size={18} />
-              </div>
-              <div className="activity-content">
-                <h4>Emily Brown paid fee for Term 2</h4>
-                <div className="activity-details">
-                  <span className="activity-initials">EB</span>
-                  Emily Brown . 1 hour ago
-                </div>
-              </div>
-            </div>
-
-            <div className="activity-item">
-              <div className="activity-icon" style={{ background: 'white', color: '#10B981', border: '1px solid #10B981' }}>
-                <Check size={18} />
-              </div>
-              <div className="activity-content">
-                <h4>Attendance marked for grade 5A</h4>
-                <div className="activity-details">
-                  <span className="activity-initials">SC</span>
-                  Sarah Connor . 2 hours ago
-                </div>
-              </div>
-            </div>
-
-            <div className="activity-item">
-              <div className="activity-icon bg-purple">
-                <Bell size={18} />
-              </div>
-              <div className="activity-content">
-                <h4>Annual sports day announcement Published</h4>
-                <div className="activity-details">
-                  <span className="activity-initials">PJ</span>
-                  Principal Johnson . 3 hour ago
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -281,11 +406,15 @@ export default function Dashboard({ onNavigate }) {
         >
           <div className="widget-header">
             <h3 className="widget-title">Alert</h3>
-            <span className="badge-new">4 New</span>
+            <span className="badge-new">{3 + teacherApprovals.filter(a => a.status === 'Pending').length + studentLeaves.filter(s => s.status === 'Pending').length} New</span>
           </div>
-          <p className="widget-subtitle">4 unread notifications</p>
+          <p className="widget-subtitle">{3 + teacherApprovals.filter(a => a.status === 'Pending').length + studentLeaves.filter(s => s.status === 'Pending').length} unread notifications</p>
 
-          <div className="alert-item info">
+          <div 
+            className="alert-item info"
+            style={{ cursor: 'pointer' }}
+            onClick={() => onNavigate && onNavigate('user-management')}
+          >
             <div className="alert-icon info">
               <Bell size={18} />
             </div>
@@ -295,17 +424,45 @@ export default function Dashboard({ onNavigate }) {
             </div>
           </div>
 
-          <div className="alert-item info">
-            <div className="alert-icon info">
-              <Bell size={18} />
+          {teacherApprovals.filter(item => item.status === 'Pending').map(item => (
+            <div 
+              key={`alert-staff-${item.id}`} 
+              className="alert-item info"
+              style={{ cursor: 'pointer' }}
+              onClick={() => onNavigate && onNavigate('approvals')}
+            >
+              <div className="alert-icon info">
+                <Bell size={18} />
+              </div>
+              <div className="alert-content">
+                <h4>Approval Request</h4>
+                <p>{item.name} submitted a {item.type.toLowerCase()}.</p>
+              </div>
             </div>
-            <div className="alert-content">
-              <h4>Approval Request</h4>
-              <p>Sarah Connor sumbitted a leave request.</p>
-            </div>
-          </div>
+          ))}
 
-          <div className="alert-item warning">
+          {studentLeaves.filter(item => item.status === 'Pending').map(item => (
+            <div 
+              key={`alert-student-${item.id}`} 
+              className="alert-item info"
+              style={{ cursor: 'pointer' }}
+              onClick={() => onNavigate && onNavigate('approvals')}
+            >
+              <div className="alert-icon info">
+                <Bell size={18} />
+              </div>
+              <div className="alert-content">
+                <h4>Student Leave Request</h4>
+                <p>{item.studentName} ({item.grade}) requested leave.</p>
+              </div>
+            </div>
+          ))}
+
+          <div 
+            className="alert-item warning"
+            style={{ cursor: 'pointer' }}
+            onClick={() => onNavigate && onNavigate('fees')}
+          >
             <div className="alert-icon warning">
               <AlertTriangle size={18} />
             </div>
@@ -315,7 +472,11 @@ export default function Dashboard({ onNavigate }) {
             </div>
           </div>
 
-          <div className="alert-item warning">
+          <div 
+            className="alert-item warning"
+            style={{ cursor: 'pointer' }}
+            onClick={() => onNavigate && onNavigate('attendance')}
+          >
             <div className="alert-icon warning">
               <AlertTriangle size={18} />
             </div>
@@ -330,58 +491,53 @@ export default function Dashboard({ onNavigate }) {
         <div className="widget-card">
           <div className="widget-header">
             <h3 className="widget-title">Pending Approvals</h3>
-            <span className="badge-count">3</span>
+            <span className="badge-count">
+              {teacherApprovals.filter(a => a.status === 'Pending').length + studentLeaves.filter(s => s.status === 'Pending').length}
+            </span>
           </div>
           <p className="widget-subtitle">Require your action</p>
 
-          <div className="approval-item">
-            <div className="approval-header">
-              <h4>Sarah Connor</h4>
-              <span className="approval-badge">Leave</span>
+          {teacherApprovals.filter(item => item.status === 'Pending').map(item => (
+            <div key={`pending-staff-${item.id}`} className="approval-item">
+              <div className="approval-header">
+                <h4>{item.name}</h4>
+                <span className="approval-badge">{item.type}</span>
+              </div>
+              <p className="approval-desc">{item.reason}</p>
+              <div className="approval-actions">
+                <button className="btn-approve" onClick={() => handleApproveTeacher(item.id)}>
+                  <Check size={16} /> Approve
+                </button>
+                <button className="btn-reject" onClick={() => handleRejectTeacher(item.id)}>
+                  <X size={16} /> Reject
+                </button>
+              </div>
             </div>
-            <p className="approval-desc">Medical leave request for 3 days</p>
-            <div className="approval-actions">
-              <button className="btn-approve">
-                <Check size={16} /> Approve
-              </button>
-              <button className="btn-reject">
-                <X size={16} /> Reject
-              </button>
-            </div>
-          </div>
+          ))}
 
-          <div className="approval-item">
-            <div className="approval-header">
-              <h4>James Porter</h4>
-              <span className="approval-badge">Attendance Edit</span>
+          {studentLeaves.filter(item => item.status === 'Pending').map(item => (
+            <div key={`pending-student-${item.id}`} className="approval-item">
+              <div className="approval-header">
+                <h4>{item.studentName}</h4>
+                <span className="approval-badge">Student Leave</span>
+              </div>
+              <p className="approval-desc">Leave date: {item.date} • "{item.reason}"</p>
+              <div className="approval-actions">
+                <button className="btn-approve" onClick={() => handleApproveStudent(item.id)}>
+                  <Check size={16} /> Approve
+                </button>
+                <button className="btn-reject" onClick={() => handleRejectStudent(item.id)}>
+                  <X size={16} /> Reject
+                </button>
+              </div>
             </div>
-            <p className="approval-desc">Request to correct attendance</p>
-            <div className="approval-actions">
-              <button className="btn-approve">
-                <Check size={16} /> Approve
-              </button>
-              <button className="btn-reject">
-                <X size={16} /> Reject
-              </button>
-            </div>
-          </div>
+          ))}
 
-          <div className="approval-item">
-            <div className="approval-header">
-              <h4>Robert Chen</h4>
-              <span className="approval-badge">Attendance Edit</span>
+          {teacherApprovals.filter(a => a.status === 'Pending').length === 0 && studentLeaves.filter(s => s.status === 'Pending').length === 0 && (
+            <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)' }}>
+              No pending approvals. All caught up!
             </div>
-            <p className="approval-desc">Attendance correction</p>
-            <div className="approval-actions">
-              <button className="btn-approve">
-                <Check size={16} /> Approve
-              </button>
-              <button className="btn-reject">
-                <X size={16} /> Reject
-              </button>
-            </div>
-          </div>
-
+          )}
         </div>
       </div>
     </>

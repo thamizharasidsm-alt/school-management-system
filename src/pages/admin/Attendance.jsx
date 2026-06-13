@@ -40,6 +40,40 @@ export default function Attendance() {
     }));
   };
 
+  const handleExportExcel = () => {
+    const headers = activeTab === 'student' 
+      ? ['Student Name', 'Student ID', 'Grade', 'Date', 'Status', 'Remarks']
+      : ['Staff Name', 'Staff ID', 'Department', 'Date', 'Status', 'Remarks'];
+    
+    const rows = filteredData.map(person => {
+      const record = attendanceRecords[person.id] || { status: 'present', remarks: '' };
+      return [
+        person.name,
+        person.id,
+        activeTab === 'student' ? person.grade : person.department,
+        dateStr,
+        record.status.toUpperCase(),
+        record.remarks
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const filename = `${activeTab}_attendance_${dateStr}.csv`;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   let presentCount = 0, absentCount = 0, lateCount = 0;
   filteredData.forEach(person => {
     const record = attendanceRecords[person.id] || { status: 'present' };
@@ -56,7 +90,7 @@ export default function Attendance() {
           <p>Track and manage student and staff attendance</p>
         </div>
         <div className="title-actions">
-          <button className="btn-outline">
+          <button className="btn-outline" onClick={handleExportExcel}>
             <Download size={18} /> Export Excel
           </button>
         </div>

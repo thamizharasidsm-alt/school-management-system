@@ -4,68 +4,81 @@ import { Search, Calendar } from 'lucide-react';
 export const PAYMENT_RECORDS = [
   {
     id: 1,
-    student: 'Liam smith',
-    idNumber: 'STD-10231',
-    grade: 'Grade 5 - A',
+    student: 'Liam Smith',
+    idNumber: 'STU-24013',
+    grade: 'Grade 5 - B',
     feeType: 'Tuition',
     receiptNo: 'REC-6821',
     amount: '$2,500',
     paidDate: '15 Oct 2024',
     status: 'Paid',
     method: 'Online',
-    avatar: 'https://randomuser.me/api/portraits/women/44.jpg' 
+    avatar: 'https://i.pravatar.cc/150?u=13' 
   },
   {
     id: 2,
-    student: 'John Smith',
-    idNumber: 'STD-10245',
+    student: 'Emily Brown',
+    idNumber: 'STU-24052',
     grade: 'Grade 6 - B',
-    feeType: 'Transport',
-    receiptNo: '-',
-    amount: '$450',
-    paidDate: '-',
-    status: 'Pending',
-    method: '-',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
+    feeType: 'Tuition (Term 1)',
+    receiptNo: 'REC-7001',
+    amount: '$2,600',
+    paidDate: '10 Oct 2024',
+    status: 'Paid',
+    method: 'Online',
+    avatar: 'https://i.pravatar.cc/150?u=eb'
   },
   {
     id: 3,
-    student: 'Michael Chang',
-    idNumber: 'STD-10258',
-    grade: 'Grade 4 - C',
+    student: 'Emily Brown',
+    idNumber: 'STU-24052',
+    grade: 'Grade 6 - B',
+    feeType: 'Tuition (Term 2)',
+    receiptNo: 'REC-7002',
+    amount: '$2,600',
+    paidDate: '12 Nov 2024',
+    status: 'Paid',
+    method: 'Online',
+    avatar: 'https://i.pravatar.cc/150?u=eb'
+  },
+  {
+    id: 4,
+    student: 'David Chen',
+    idNumber: 'STU-24001',
+    grade: 'Grade 4 - A',
     feeType: 'Exam',
     receiptNo: '-',
     amount: '$150',
     paidDate: '-',
     status: 'Overdue',
     method: '-',
-    avatar: 'https://randomuser.me/api/portraits/men/46.jpg'
+    avatar: 'https://i.pravatar.cc/150?u=1'
   },
   {
-    id: 4,
-    student: 'Sophia Patel',
-    idNumber: 'STD-10262',
-    grade: 'Grade 7 - C',
+    id: 5,
+    student: 'Alex Johnson',
+    idNumber: 'STU-24011',
+    grade: 'Grade 5 - A',
     feeType: 'Tuition',
     receiptNo: 'REC-6841',
     amount: '$2,200',
     paidDate: '07 Oct 2024',
     status: 'Paid',
     method: 'Online',
-    avatar: 'https://randomuser.me/api/portraits/women/65.jpg'
+    avatar: 'https://i.pravatar.cc/150?u=11'
   },
   {
-    id: 5,
-    student: 'Sophia martinez',
-    idNumber: 'STD-10262',
-    grade: 'Grade 5 - A',
+    id: 6,
+    student: 'Emma Davis',
+    idNumber: 'STU-24022',
+    grade: 'Grade 6 - B',
     feeType: 'Library',
     receiptNo: 'REC-6841',
     amount: '$2,200',
     paidDate: '07 Oct 2024',
     status: 'Paid',
     method: 'Cash',
-    avatar: 'https://randomuser.me/api/portraits/women/68.jpg'
+    avatar: 'https://i.pravatar.cc/150?u=22'
   }
 ];
 
